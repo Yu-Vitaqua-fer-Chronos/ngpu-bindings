@@ -1,3 +1,4 @@
 output.json
 cache/
 wgpu-native/
+futharkwgpu.nim
