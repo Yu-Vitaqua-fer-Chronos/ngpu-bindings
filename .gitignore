@@ -1,5 +1,7 @@
 output.json
+opir.json
 cache/
 wgpu-native/
 futharkwgpu.nim
 main
+tools/generate
