@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import os
 import json
 import re
 
@@ -21,8 +22,37 @@ def to_nim_case(data):
         else:
             tmp.append(text.title())
 
+    if data['kind'] in ('proc',):
+        tmp[0] = tmp[0].lower()
+
     result = ''.join(tmp)
     return result
 
+
+if not os.environ.get("CLANGINCLUDE"):
+    raise SystemExit("Define the env var `CLANGINCLUDE`!")
+
+nim_gen = f"""import strutils
+
+import futhark
+
+
+importc:
+  sysPath "{os.environ['CLANGINCLUDE']}"
+  path "."
+
+  #[ START OF ALL THE NAMES ]#
+
+"""
+
 for i in data:
-    print(f"  rename \"{i['name']}\", \"{to_nim_case(i)}\"")
+    nim_gen += f"  rename \"{i['name']}\", \"{to_nim_case(i)}\"\n"
+
+nim_gen += """\n
+  #[ END OF ALL THE NAMES ]#
+
+  "wgpu-native/ffi/wgpu.h"
+"""
+
+with open('main.nim', 'w+') as f:
+    f.write(nim_gen)
