@@ -22,19 +22,40 @@ def to_nim_case(data):
         else:
             tmp.append(text.title())
 
-    if data['kind'] in ('proc',):
+    if data.get('kind', '<>') == 'proc':
         tmp[0] = tmp[0].lower()
 
     result = ''.join(tmp)
     return result
 
 
+try:
+    with open('config.json') as f:
+        config = json.load(f)
+except FileNotFoundError:
+    config = {}
+
+
 if not os.environ.get("CLANGINCLUDE"):
     raise SystemExit("Define the env var `CLANGINCLUDE`!")
+
+renamed = ''
+for i in data:
+    renamed += f"  rename \"{i['name']}\", \"{to_nim_case(i)}\"\n"
+
+imports = ''
+for i in config.get('imports', []):
+    imports += f"import {i}\n"
+
+retyped = ''
+for i in config.get('retyped', {}):
+    retyped += f"  retype {i}, {config['retyped'][i]}\n"
 
 nim_gen = f"""import strutils
 
 import futhark
+
+{imports}
 
 
 importc:
@@ -43,13 +64,17 @@ importc:
 
   #[ START OF ALL THE NAMES ]#
 
-"""
+{renamed}
 
-for i in data:
-    nim_gen += f"  rename \"{i['name']}\", \"{to_nim_case(i)}\"\n"
-
-nim_gen += """\n
   #[ END OF ALL THE NAMES ]#
+
+
+  #[ START OF RETYPING ]#
+
+{retyped}
+
+  #[ END OF RETYPING ]#
+
 
   "wgpu-native/ffi/wgpu.h"
 """

@@ -3,6 +3,8 @@ import strutils
 import futhark
 
 
+
+
 importc:
   sysPath "/data/data/com.termux/files/usr/lib/clang/14.0.0/include"
   path "."
@@ -609,5 +611,13 @@ importc:
 
 
   #[ END OF ALL THE NAMES ]#
+
+
+  #[ START OF RETYPING ]#
+
+
+
+  #[ END OF RETYPING ]#
+
 
   "wgpu-native/ffi/wgpu.h"
